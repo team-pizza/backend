@@ -1,0 +1,1 @@
+To install TypeScript globally on your computer (required) be sure to run `npm install -g typescript`
