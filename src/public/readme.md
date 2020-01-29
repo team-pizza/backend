@@ -1,0 +1,1 @@
+Everything inside of the public folder will be served statically!
