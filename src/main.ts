@@ -1,4 +1,6 @@
 import express from 'express'
+import https from 'https'
+import fs from 'fs'
 import auth from './routes/auth'
 import events from './routes/events'
 
@@ -16,6 +18,10 @@ app.use('/events', events)
 
 app.use(express.static('./src/public/'))
 
-app.listen(3000, () => {
-    console.log('Server is running')
+https.createServer({
+    key: fs.readFileSync('server.key'),
+    cert: fs.readFileSync('server.cert')
+}, app)
+.listen(443, () => {
+    console.log('Server listening on port 443!')
 })
