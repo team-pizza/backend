@@ -1,5 +1,6 @@
 import express from 'express'
 import auth from './routes/auth'
+import events from './routes/events'
 
 const app = express()
 
@@ -11,6 +12,7 @@ app.get('/', (req, res, next) => {
 app.use(express.json())
 
 app.use('/auth', auth)
+app.use('/events', events)
 
 app.use(express.static('./src/public/'))
 
