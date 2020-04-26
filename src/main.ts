@@ -4,6 +4,9 @@ import fs from 'fs'
 import auth from './routes/auth'
 import events from './routes/events'
 
+import database from './Database'
+database.testConnect()
+
 const app = express()
 
 app.get('/', (req, res, next) => {
