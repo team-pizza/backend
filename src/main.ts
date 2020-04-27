@@ -2,10 +2,7 @@ import express from 'express'
 import https from 'https'
 import fs from 'fs'
 import auth from './routes/auth'
-import events from './routes/events'
-
-import database from './Database'
-database.testConnect()
+import { events } from './routes/events'
 
 const app = express()
 

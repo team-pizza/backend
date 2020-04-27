@@ -1,15 +1,16 @@
 import express from 'express'
+import database from '../Database'
 
 let router = express.Router()
 
 interface Event {
     start: Date
-    durationInMinutes: Number
+    durationInMinutes: number
 }
 interface EventList {
     events: Array<Event>
     start: Date
-    spanInMinutes: Number
+    spanInMinutes: number
 }
 
 router.post('/upload', async (req, res, next) => {
@@ -18,11 +19,24 @@ router.post('/upload', async (req, res, next) => {
 
     let eventList: EventList = req.body
 
-    // TODO: Add events into database
+    try {
+        await database.addEvents(eventList.events.map(event => {
+            return {
+                Date: event.start,
+                Duration: event.durationInMinutes
+            }
+        }))
+
+        console.log('All database events:')
+        console.log(await database.getAllEvents())
+    } catch (error) {
+        console.log(error)
+    }
+
 
     res.json({
         success: true
     })
 })
 
-export default router
+export { router as events, Event, EventList }
