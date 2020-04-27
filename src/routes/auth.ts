@@ -1,4 +1,5 @@
 import express from 'express'
+import database from '../Database'
 
 const cred = require('../../credentials.json')
 const { OAuth2Client } = require('google-auth-library')
@@ -11,14 +12,23 @@ async function verify(token: String) {
     })
     const payload = ticket.getPayload()
     const userid = payload['sub']
-    return userid
+    return {
+        userId: payload.sub,
+        email: payload.email
+    }
 }
 
 let router = express.Router()
 
 
+interface GoogleSignInRequest {
+    googleIdentificationToken: string
+}
+
 router.post('/', async (req, res, next) => {
-    console.log(req.body)
+    let request: GoogleSignInRequest = req.body
+    let accountDetails = await verify(request.googleIdentificationToken)
+    // database.getAllAccounts(...)
     console.log(await verify(req.body.token))
 })
 
