@@ -16,26 +16,26 @@ interface EventList {
 router.post('/upload', async (req, res, next) => {
     let sessionToken = req.header('sessionToken')
     // TODO: Use sessionToken to verify identity of who sent this
+    let userID = "72539478479825" // Once authentication is done, replace with function for finding real userID
 
     let eventList: EventList = req.body
 
-    try {
-        await database.addEvents(eventList.events.map(event => {
-            return {
-                Date: event.start,
-                Duration: event.durationInMinutes
-            }
-        }))
+    let result = false
 
-        console.log('All database events:')
+    try {
+        result = await database.replaceEventsForUserInSpan(userID, eventList)
+
+        // For debugging purposes, remove before production
+        console.log(await database.getAllAccounts())
         console.log(await database.getAllEvents())
+        console.log(await database.getAllGroups())
     } catch (error) {
         console.log(error)
     }
 
 
     res.json({
-        success: true
+        success: result
     })
 })
 
