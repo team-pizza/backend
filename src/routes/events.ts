@@ -3,11 +3,11 @@ import database from '../Database'
 
 let router = express.Router()
 
-interface Event {
+export interface Event {
     start: Date
     durationInMinutes: number
 }
-interface EventList {
+export interface EventList {
     events: Array<Event>
     start: Date
     spanInMinutes: number
@@ -39,4 +39,4 @@ router.post('/upload', async (req, res, next) => {
     })
 })
 
-export { router as events, Event, EventList }
+export default router
