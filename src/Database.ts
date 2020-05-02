@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { MongoClient, Db, ObjectId, FilterQuery } from 'mongodb'
+import { MongoClient, Db, ObjectId, FilterQuery, UpdateQuery, MatchKeysAndValues } from 'mongodb'
 import { Event, EventList } from './routes/events'
 
 const mongoDBCredentials = JSON.parse(fs.readFileSync('mongoDBCredentials.json', 'utf-8'))
@@ -8,7 +8,7 @@ const mongoDBURL: string = mongoDBCredentials.url.replace('<username>', mongoDBC
 
 const client = new MongoClient(mongoDBURL)
 
-interface EventCollection {
+export interface EventCollection {
     _id?: ObjectId,
     Date: Date,
     Time?: string,
@@ -18,7 +18,7 @@ interface EventCollection {
     Account?: ObjectId
 }
 
-interface AccountCollection {
+export interface AccountCollection {
     _id?: ObjectId,
     userID: string,
     email: string,
@@ -26,7 +26,7 @@ interface AccountCollection {
     Events?: Array<ObjectId>
 }
 
-interface GroupCollection {
+export interface GroupCollection {
     _id?: ObjectId,
     groupName: string,
     groupOwner: ObjectId,
@@ -94,6 +94,17 @@ class Database {
             reject(err)
         })
     }
+    private updateOne<T>(collectionName: string, resolve: (value?: void | PromiseLike<void> | undefined) => void, reject: (reason?: any) => void, filterQuery: FilterQuery<any>, updateQuery: MatchKeysAndValues<any>) {
+        this.doWithDB(async db => {
+            db.collection(collectionName).updateOne(filterQuery, {
+                $set: updateQuery
+            })
+                .then(() => resolve())
+                .catch((err) => reject(err))
+        }, err => {
+            reject(err)
+        })
+    }
 
     addEvents(elements: Array<EventCollection>): Promise<void> {
         return new Promise((resolve, reject) => {
@@ -140,6 +151,22 @@ class Database {
     destroyAllGroups(filterQuery: FilterQuery<any> = {}): Promise<void> {
         return new Promise((resolve, reject) => {
             this.destroyAll('Group', resolve, reject, filterQuery)
+        })
+    }
+
+    updateEvent(filterQuery: FilterQuery<any>, updateQuery: MatchKeysAndValues<any>): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.updateOne('Event', resolve, reject, filterQuery, updateQuery)
+        })
+    }
+    updateAccount(filterQuery: FilterQuery<any>, updateQuery: MatchKeysAndValues<any>): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.updateOne('Account', resolve, reject, filterQuery, updateQuery)
+        })
+    }
+    updateGroup(filterQuery: FilterQuery<any>, updateQuery: MatchKeysAndValues<any>): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.updateOne('Group', resolve, reject, filterQuery, updateQuery)
         })
     }
 

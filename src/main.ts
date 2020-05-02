@@ -2,7 +2,8 @@ import express from 'express'
 import https from 'https'
 import fs from 'fs'
 import auth from './routes/auth'
-import { events } from './routes/events'
+import events from './routes/events'
+import groups from './routes/groups'
 
 const app = express()
 
@@ -15,6 +16,7 @@ app.use(express.json())
 
 app.use('/auth', auth)
 app.use('/events', events)
+app.use('/groups', groups)
 
 app.use(express.static('./src/public/'))
 
