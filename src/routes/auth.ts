@@ -55,7 +55,7 @@ router.post('/', async (req, res, next) => {
                 Groups: []
             }])
         }
-    let successFlag = true
+    successFlag = true
     } catch (error) {
         console.log(error)
     }
@@ -65,7 +65,7 @@ router.post('/', async (req, res, next) => {
 
     res.json({
         success: successFlag,
-        sessionKey: key
+        sessionToken: key
     })
     
 })
