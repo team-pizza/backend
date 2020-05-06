@@ -6,6 +6,7 @@ let router = express.Router()
 
 interface GroupObject {
     groupName: string,
+    groupOwner: string,
     userEmails: Array<string>
 }
 

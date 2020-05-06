@@ -4,6 +4,8 @@ import fs from 'fs'
 import auth from './routes/auth'
 import events from './routes/events'
 import groups from './routes/groups'
+import sendAccount from './routes/sendAccount'
+import sendGroup from './routes/sendGroup'
 
 const app = express()
 
@@ -17,6 +19,8 @@ app.use(express.json())
 app.use('/auth', auth)
 app.use('/events', events)
 app.use('/groups', groups)
+app.use('/sendGroup', sendGroup)
+app.use('/sendAccount', sendAccount)
 
 app.use(express.static('./src/public/'))
 
