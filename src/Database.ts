@@ -170,6 +170,22 @@ class Database {
         })
     }
 
+    updateEvent(filterQuery: FilterQuery<any>, updateQuery: MatchKeysAndValues<any>): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.updateOne('Event', resolve, reject, filterQuery, updateQuery)
+        })
+    }
+    updateAccount(filterQuery: FilterQuery<any>, updateQuery: MatchKeysAndValues<any>): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.updateOne('Account', resolve, reject, filterQuery, updateQuery)
+        })
+    }
+    updateGroup(filterQuery: FilterQuery<any>, updateQuery: MatchKeysAndValues<any>): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.updateOne('Group', resolve, reject, filterQuery, updateQuery)
+        })
+    }
+
     async replaceEventsForUserInSpan(userID: string, eventList: EventList): Promise<boolean> {
         try {
             let accountId = (await this.getAllAccounts({ userID: userID }))[0]._id as ObjectId
