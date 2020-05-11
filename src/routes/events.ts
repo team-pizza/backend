@@ -1,5 +1,6 @@
 import express from 'express'
 import database from '../Database'
+import { queryKey } from './auth'
 
 let router = express.Router()
 
@@ -14,21 +15,17 @@ export interface EventList {
 }
 
 router.post('/upload', async (req, res, next) => {
-    let sessionToken = req.header('sessionToken')
-    // TODO: Use sessionToken to verify identity of who sent this
-    let userID = "72539478479825" // Once authentication is done, replace with function for finding real userID
+    let sessionToken = req.header('sessionToken') || 'undefined'
+    let userID = queryKey(sessionToken)
 
     let eventList: EventList = req.body
 
     let result = false
 
     try {
-        result = await database.replaceEventsForUserInSpan(userID, eventList)
-
-        // For debugging purposes, remove before production
-        console.log(await database.getAllAccounts())
-        console.log(await database.getAllEvents())
-        console.log(await database.getAllGroups())
+        if (userID) {
+            result = await database.replaceEventsForUserInSpan(userID, eventList)
+        }
     } catch (error) {
         console.log(error)
     }
