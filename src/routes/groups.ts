@@ -109,4 +109,41 @@ router.post('/invite/', async (req, res, next) => {
     })
 })
 
+router.get('/join/:groupIdHex/:accountIdHex', async (req, res, next) => {
+    let success = false
+    let groupName: string | null = null
+    try {
+        let groupId = new ObjectId(req.params.groupIdHex)
+        let accountId = new ObjectId(req.params.accountIdHex)
+
+        let account = (await database.getAllAccounts({_id: accountId}))[0]
+        let group = (await database.getAllGroups({_id: groupId}))[0]
+
+        let groupMembers = group.groupMembers
+
+        groupMembers.push(account._id as ObjectId)
+
+        let distinctMembers = [...(new Set(groupMembers))]
+
+        if(groupMembers.length != distinctMembers.length) {
+            await database.updateGroup({_id: group._id}, { groupMembers: distinctMembers })
+        } else {
+            res.send(`<html><body><p>Invite already accepted.</p></body></html>`)
+            return
+        }
+
+        groupName = group.groupName
+        success = true
+    } catch (error) {
+        console.log(error)
+    }
+
+    if(success) {
+        res.send(`<html><body><h1>You have successfully joined "${groupName || 'null'}"</h1><br /><p>Please open the app on your Android device to continue.</p></body></html>`)
+    } else {
+        res.send(`<html><body><p>Error. Something went wrong. Please ask your group owner to resend your invite.</p></body></html>`)
+    }
+
+})
+
 export default router
