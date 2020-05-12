@@ -4,8 +4,6 @@ import { Event, EventList } from './routes/events'
 import auth from './routes/auth'
 import Database, { EventCollection } from './Database'
 
-
-
 class Heatmap {
 
     private numberBusy: any = {} //numberBusy[bucketNumber] = number
@@ -28,7 +26,7 @@ class Heatmap {
         //promise of array of events
         var userEvents = await Database.getAllEvents({Account:{$in:userAccounts.map(account => {return account._id})}})//with specific user id
         //check each time frame in numberBusy
-       
+        return userEvents
         //if there is an event in that time frame, increment the value 
     }
 
@@ -85,6 +83,14 @@ class Heatmap {
             this.percentBusy[i] = this.numberBusy[i]/100
         }
         //percentBusy will be used to determine colors of blocks on the UI
+    }
+
+    //creates the heatmap
+    public async createHeatmap(groupId:ObjectId, date:Date){
+        var events = await this.countCalendarEvents(groupId)
+        this.delegateBuckets(events)
+        this.calculateBusy(date)
+        this.calculatePercentages()
     }
 }
 
