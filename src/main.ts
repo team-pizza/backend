@@ -6,6 +6,7 @@ import events from './routes/events'
 import groups from './routes/groups'
 import sendAccount from './routes/sendAccount'
 import sendGroup from './routes/sendGroup'
+import heatmap from './routes/heatmap'
 
 const app = express()
 
@@ -21,6 +22,7 @@ app.use('/events', events)
 app.use('/groups', groups)
 app.use('/sendGroup', sendGroup)
 app.use('/sendAccount', sendAccount)
+app.use('/heatmap', heatmap)
 
 app.use(express.static('./src/public/'))
 
