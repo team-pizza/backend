@@ -10,6 +10,8 @@ import heatmap from './routes/heatmap'
 
 const app = express()
 
+export const url = 'localhost'
+
 app.get('/', (req, res, next) => {
     res.header('Content-Security-Policy', 'frame-src https://*.google.com')
     next()
@@ -31,5 +33,5 @@ https.createServer({
     cert: fs.readFileSync('server.cert')
 }, app)
 .listen(443, () => {
-    console.log('Server listening on port 443!')
+    console.log(`Server listening @ ${url}`)
 })
