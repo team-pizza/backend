@@ -1,6 +1,7 @@
 import express, { response } from 'express'
 import database, { GroupCollection } from '../Database'
 import { ObjectId } from 'mongodb'
+import { queryKey } from './auth'
 
 let router = express.Router()
 
@@ -51,6 +52,31 @@ router.post('/invite/', async (req, res, next) => {
 
     res.json({
         success: success
+    })
+})
+
+router.get('/list/', async (req, res, next) => {
+    let sessionToken = req.header('sessionToken') || 'undefined'
+    let userID = queryKey(sessionToken)
+
+    let success = false
+    let account = null
+    try {
+        account = await database.getAllAccounts({userID: userID})
+        success = true
+    } catch (error) {
+        console.log(error)
+    }
+
+    let grouplist = null
+
+    if(!(account == null)){
+        grouplist = account[0].Groups
+    }
+    
+    res.json({
+        success: success,
+        groups: grouplist
     })
 })
 
