@@ -1,6 +1,7 @@
 import express, { response } from 'express'
 import database, { GroupCollection } from '../Database'
 import { ObjectId } from 'mongodb'
+import { queryKey } from './auth'
 
 let router = express.Router()
 
@@ -11,8 +12,8 @@ interface GroupInviteRequest {
 
 async function getGroupByNameFromList(groupName: string, groups: Array<ObjectId>): Promise<GroupCollection> {
     groups.forEach(async groupID => {
-        let group = (await database.getAllGroups({_id: groupID}))[0]
-        if(group.groupName == groupName) {
+        let group = (await database.getAllGroups({ _id: groupID }))[0]
+        if (group.groupName == groupName) {
             return group
         }
     })
@@ -28,21 +29,21 @@ router.post('/invite/', async (req, res, next) => {
 
     let success = false
     try {
-        let groupOwner = (await database.getAllAccounts({userID: userID}))[0]
+        let groupOwner = (await database.getAllAccounts({ userID: userID }))[0]
         let group = await getGroupByNameFromList(groupInviteRequest.groupName, groupOwner.Groups)
         let groupMembers = group.groupMembers
         groupInviteRequest.userEmails.forEach(async email => {
-            let possibleAccounts = await database.getAllAccounts({email: email})
-            if(possibleAccounts.length == 1) {
+            let possibleAccounts = await database.getAllAccounts({ email: email })
+            if (possibleAccounts.length == 1) {
                 let invitedUser = possibleAccounts[0]
                 groupMembers.push(invitedUser._id as ObjectId)
-            } else if(possibleAccounts.length == 0) {
+            } else if (possibleAccounts.length == 0) {
                 console.log(`There is not an account associated with "${email}", skipping`)
             }
         })
         let distinctGroupMembers = [...new Set(groupMembers)]
-        if(distinctGroupMembers != groupMembers) {
-            await database.updateGroup({ _id: group._id }, {groupMembers: distinctGroupMembers})
+        if (distinctGroupMembers != groupMembers) {
+            await database.updateGroup({ _id: group._id }, { groupMembers: distinctGroupMembers })
         }
         success = true
     } catch (error) {
@@ -51,6 +52,29 @@ router.post('/invite/', async (req, res, next) => {
 
     res.json({
         success: success
+    })
+})
+
+router.get('/list/', async (req, res, next) => {
+    let sessionToken = req.header('sessionToken') || 'undefined'
+    let userID = queryKey(sessionToken)
+
+    let success = false
+    let account = null
+    let groupList = null
+    try {
+        account = await database.getAllAccounts({ userID: userID })
+        if (!(account == null)) {
+            groupList = await database.getAllGroups({ _id: { $in: account[0].Groups } })
+            success = true
+        }
+    } catch (error) {
+        console.log(error)
+    }
+
+    res.json({
+        success: success,
+        groups: groupList
     })
 })
 
