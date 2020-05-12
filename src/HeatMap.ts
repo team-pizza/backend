@@ -11,7 +11,9 @@ let bucketsForDate: any = {}//bucketsForDate[day] = bucketList
 class Heatmap {
     constructor(){
         //fills the numberBusy with all 0s
-        //numberBusy[timeBucket] = 0      
+        for(var i=0; i<95;i++){
+            numberBusy[i] = 0
+        }  
     }
 
     //determines if there is an event within a specific time frame
