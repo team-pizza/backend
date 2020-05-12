@@ -4,15 +4,18 @@ import { Event, EventList } from './routes/events'
 import auth from './routes/auth'
 import Database, { EventCollection } from './Database'
 
-let numberBusy: any = {} //numberBusy[bucketNumber] = number
-let percentBusy: any = {} //percentBusy[bucketNumber] = percentage
-let bucketsForDate: any = {}//bucketsForDate[day] = bucketList
+
 
 class Heatmap {
+
+    private numberBusy: any = {} //numberBusy[bucketNumber] = number
+    private percentBusy: any = {} //percentBusy[bucketNumber] = percentage
+    private bucketsForDate: any = {}//bucketsForDate[day] = bucketList
+
     constructor(){
         //fills the numberBusy with all 0s
         for(var i=0; i<95;i++){
-            numberBusy[i] = 0
+            this.numberBusy[i] = 0
         }  
     }
 
@@ -35,17 +38,17 @@ class Heatmap {
         for(var event of events){
             //handle each time within each date
             let eventBucketList = this.createBuckets(event)
-            bucketsForDate[event.Date.getDate()] = eventBucketList
+            this.bucketsForDate[event.Date.getDate()] = eventBucketList
         }
 
     }
 
     //calculates how many people are busy on a specific day
     private calculateBusy(specifiedDate:Date){
-        let b = bucketsForDate[specifiedDate.getDate()]
+        let b = this.bucketsForDate[specifiedDate.getDate()]
 
         for(var i = 0; i < b.length(); i++){
-            numberBusy[b[i]]++
+            this.numberBusy[b[i]]++
         }
 
     }
@@ -78,8 +81,8 @@ class Heatmap {
 
     //calculates the number in the array over 100 as a 2-digit decimal
     private calculatePercentages(){
-        for(var i = 0; i< numberBusy.length; i++){
-            percentBusy[i] = numberBusy[i]/100
+        for(var i = 0; i< this.numberBusy.length; i++){
+            this.percentBusy[i] = this.numberBusy[i]/100
         }
         //percentBusy will be used to determine colors of blocks on the UI
     }
