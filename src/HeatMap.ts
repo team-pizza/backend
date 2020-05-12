@@ -4,7 +4,7 @@ import { Event, EventList } from './routes/events'
 import auth from './routes/auth'
 import Database, { EventCollection } from './Database'
 
-class Heatmap {
+export default class Heatmap {
 
     private numberBusy: any = {} //numberBusy[bucketNumber] = number
     private percentBusy: any = {} //percentBusy[bucketNumber] = percentage
