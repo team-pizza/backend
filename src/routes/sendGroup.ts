@@ -1,5 +1,5 @@
 import express, { response } from 'express'
-import database, { GroupCollection } from '../Database'
+import database, { GroupCollection, AccountCollection } from '../Database'
 import { ObjectId } from 'mongodb'
 
 let router = express.Router()
@@ -29,9 +29,17 @@ router.post('/sendGroup/', async (req, res, next) => {
 
     let success = false
     try {
-        let groupOwner = (await database.getAllAccounts({userID: userID}))[0]
-        let group = await getGroupByNameFromList(groupObject.groupName, groupOwner.Groups)
+        let owner = (await database.getAllAccounts({userID: userID}))[0]
+        groupObject.groupOwner = owner.email
+        let group = await getGroupByNameFromList(groupObject.groupName, owner.Groups)
+        groupObject.groupName = group.groupName
         let groupMembers = group.groupMembers
+        let emails = Array<string>()
+        groupMembers.forEach(async member => {
+            let groupMember = (await database.getAllAccounts({userID: userID}))[0]
+            emails.push(groupMember.email)
+        })
+        groupObject.userEmails = emails
         success = true
     } catch (error) {
         console.log(error)
