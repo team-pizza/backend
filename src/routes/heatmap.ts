@@ -18,18 +18,19 @@ router.post('/', async (req, res, next) => {
     let heatmapRequest: HeatmapRequest = req.body
 
     let success = false
+    let result = null
     try {
         let groudId = new ObjectId(heatmapRequest.groupIdHex)
         let heatmap = new Heatmap()
-        heatmap.createHeatmap(groudId, new Date(heatmapRequest.date))
-
+        result = await heatmap.createHeatmap(groudId, new Date(heatmapRequest.date))
+        success = true
     } catch (error) {
         console.log(error)
     }
 
-
     res.json({
-        success: success
+        success: success,
+        heatmap: result
     })
 })
 

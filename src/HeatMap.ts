@@ -6,23 +6,15 @@ import Database, { EventCollection } from './Database'
 
 export default class Heatmap {
 
-    private numberBusy: any = {} //numberBusy[bucketNumber] = number
-    private percentBusy: any = {} //percentBusy[bucketNumber] = percentage
-    private bucketsForDate: any = {}//bucketsForDate[day] = bucketList
+    private totalMembersInGroup = 0
 
-    constructor(){
-        //fills the numberBusy with all 0s
-        for(var i=0; i<95;i++){
-            this.numberBusy[i] = 0
-        }  
-    }
-
-    //determines if there is an event within a specific time frame
-    private async countCalendarEvents(groupId:ObjectId){
+    private async getAllEventsForGroup(groupId:ObjectId){
         var group = await Database.getAllGroups({_id:groupId})
         //get all users in group
         //could fail if "group" is empty?
         var userAccounts = await Database.getAllAccounts({_id:{$in:group[0].groupMembers}})
+
+        this.totalMembersInGroup = userAccounts.length
         //promise of array of events
         var userEvents = await Database.getAllEvents({Account:{$in:userAccounts.map(account => {return account._id})}})//with specific user id
         //check each time frame in numberBusy
@@ -31,66 +23,55 @@ export default class Heatmap {
     }
 
     //places events into buckets
-    private delegateBuckets(events:EventCollection[]){
+    private delegateBuckets(buckets: Array<number>, events:EventCollection[], date: Date){
         //for each date in events
         for(var event of events){
             //handle each time within each date
-            let eventBucketList = this.createBuckets(event)
-            this.bucketsForDate[event.Date.getDate()] = eventBucketList
+            let startTime = new Date(event.Date)
+            let startTimeInMilliseconds = startTime.getTime()
+            let durationInMilliseconds = event.Duration * 60 * 1000
+            let endTime = new Date(startTimeInMilliseconds + durationInMilliseconds)
+
+            let startIndex = this.getBucketIndex(startTime, date, 15)
+            if(startIndex > 96) { continue }
+            let endIndex = this.getBucketIndex(endTime, date, 15)
+            if(endIndex < 0) { continue }
+
+            startIndex = Math.max(startIndex, 0)
+            endIndex = Math.min(endIndex, 96)
+
+            for(let i = startIndex; i<endIndex; i++) {
+                buckets[i]++
+            }
         }
 
     }
 
-    //calculates how many people are busy on a specific day
-    private calculateBusy(specifiedDate:Date){
-        let b = this.bucketsForDate[specifiedDate.getDate()]
-
-        for(var i = 0; i < b.length(); i++){
-            this.numberBusy[b[i]]++
-        }
-
+    private getBucketIndex(at: Date, relativeTo: Date, bucketWidthInMinutes: number): number {
+        let midnight = new Date(relativeTo.getFullYear(), relativeTo.getMonth(), relativeTo.getDate(), 0, 0, 0, 0)
+        let midnightInMilliseconds = midnight.getTime()
+        let atTimeMilliseconds = at.getTime()
+        let bucketWidthInMilliseconds = bucketWidthInMinutes * 60 * 1000
+        return Math.floor((atTimeMilliseconds - midnightInMilliseconds) / bucketWidthInMilliseconds)
     }
 
     //creates buckets of time based on fifteen minute increments
-    private createBuckets(event:EventCollection){
-        let startTime = event.Date 
-        //array of buckets
+    private createBuckets(){
         let bucketList = new Array<number>(96)
-        
-        //find the start time
-        let startTimeInMilliseconds = startTime.getTime() //milliseconds since Jan 1, 1975
-
-        //find the end time
-        let durationInMilliseconds = event.Duration * 60000
-        let endTimeinMilliseconds = startTimeInMilliseconds + durationInMilliseconds
-
-        let endTime = new Date(endTimeinMilliseconds)
-       
-        let startBucket = ((startTime.getHours()*4) + Math.floor(startTime.getMinutes()/15))
-        let endBucket = ((endTime.getHours()*4) + Math.floor(endTime.getMinutes()/15))
-
-        for(var i = startBucket; i < endBucket; i++){
-            bucketList.push(i)
-        }
-
+        bucketList.fill(0)
         return bucketList
-
-    }
-
-    //calculates the number in the array over 100 as a 2-digit decimal
-    private calculatePercentages(){
-        for(var i = 0; i< this.numberBusy.length; i++){
-            this.percentBusy[i] = this.numberBusy[i]/100
-        }
-        //percentBusy will be used to determine colors of blocks on the UI
     }
 
     //creates the heatmap
     public async createHeatmap(groupId:ObjectId, date:Date){
-        var events = await this.countCalendarEvents(groupId)
-        this.delegateBuckets(events)
-        this.calculateBusy(date)
-        this.calculatePercentages()
+        var events = await this.getAllEventsForGroup(groupId)
+        let buckets = this.createBuckets()
+        this.delegateBuckets(buckets, events, date)
+        return {
+            date: date,
+            buckets: buckets,
+            totalMembers: this.totalMembersInGroup
+        }
     }
 }
 
