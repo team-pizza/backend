@@ -118,7 +118,7 @@ class Database {
     }
     addGroups(elements: Array<GroupCollection>): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.addAll('Group', elements, resolve, reject)
+            this.addAll('Groups', elements, resolve, reject)
         })
     }
 
@@ -134,7 +134,7 @@ class Database {
     }
     getAllGroups(filterQuery: FilterQuery<any> | undefined = undefined): Promise<Array<GroupCollection>> {
         return new Promise((resolve, reject) => {
-            this.getAll('Group', resolve, reject, filterQuery)
+            this.getAll('Groups', resolve, reject, filterQuery)
         })
     }
 
@@ -150,7 +150,7 @@ class Database {
     }
     destroyAllGroups(filterQuery: FilterQuery<any> = {}): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.destroyAll('Group', resolve, reject, filterQuery)
+            this.destroyAll('Groups', resolve, reject, filterQuery)
         })
     }
 
@@ -166,7 +166,7 @@ class Database {
     }
     updateGroup(filterQuery: FilterQuery<any>, updateQuery: MatchKeysAndValues<any>): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.updateOne('Group', resolve, reject, filterQuery, updateQuery)
+            this.updateOne('Groups', resolve, reject, filterQuery, updateQuery)
         })
     }
 
